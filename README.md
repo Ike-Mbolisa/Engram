@@ -3,13 +3,13 @@
 Overview
 ------------------------------------------------------------------------------
 Engram is a data logging program for cars. 
-It connects to an OBDII Adapter connected to a car, and while the ignition is one, it will log RPM and Velocity of the car. 
+It connects to an OBDII Adapter connected to a car, and while the ignition is on, it will log RPM and Velocity of the car. 
 Currently only compatible with a 2021 Qashqai
 
 Engram has the following features:
  - Can export CSV Filer
  - Can export Metric
- - Can connect to an OBDII Adapter and recieve data
+ - Can connect to an OBDII Adapter and receive data
 
 Usage
 ------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ This includes:
  - Portability
  - Launching outside of Visual Studio Code, or any code editor
 
-At the moment the program is only able to recieve data from a 2021 Qashqai. This will be addressed in later versions, alongside other limitations 
+At the moment the program is only able to receive data from a 2021 Qashqai. This will be addressed in later versions, alongside other limitations 
 
 
 ////
@@ -40,7 +40,7 @@ Overblik
 ------------------------------------------------------------------------------
 Engram er et dataregistrerings program til biler. 
 Programmet forbinder sig med en OBDII Adapter som er tilsluttet til en bil. Mens det er at motoren er tændt, registrere den omdrejninger og hastigheden i bilen. 
-Lige kan programmet kun bruges i en 2021 Qashqai.
+I øjeblikket kan programmet bruges i en 2021 Qashqai.
 
 Engram kan følgende: 
 
@@ -57,10 +57,10 @@ Dog hvis man starter det fra Visual Studio eller VS Code, kræver det at man har
 
 Under vejs / Anerkendelser
 ------------------------------------------------------------------------------
-Lige nu i version 0.4, mangler der stadig en masser. 
+Lige nu i version 0.4, mangler programmet stadig en del. 
 Det inkludere:
 
-- Kompatibilitet med andre biller
+- Kompatibilitet med andre biler
 - Bedre dataregristrering
 - Ui
 - bærbarhed
