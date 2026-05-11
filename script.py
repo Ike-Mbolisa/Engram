@@ -16,6 +16,9 @@ def read_obd() -> tuple[float, float]:
     connection = obd.OBD()
     Revolutions = connection.query(obd.commands.RPM).value.magnitude
     Velocity = connection.query(obd.commands.SPEED).value.to("km/h").magnitude
+    if connection == False:
+        export_csv()    
+    
     return Revolutions, Velocity
 
 def live_gear_estimate() -> int:
