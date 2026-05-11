@@ -1,5 +1,6 @@
 import obd
-import pandas
+import pandas as pd
+from asammdf import MDF
 
 TYRE = 2.154  # meters
 FINAL_DRIVE = 4.214
@@ -18,3 +19,19 @@ def estimate_gear(rpm, speed_kmh):
    calculated_ratio = (rpm / 60 * TYRE) / (speed_ms * FINAL_DRIVE)
    closest_gear = min(GEAR_RATIOS, key=lambda g: abs(GEAR_RATIOS[g] - calculated_ratio))
    return closest_gear
+
+def export_csv(input_file: str, output_file: str = 'output.csv'):
+    mdf = MDF(input_file)
+    
+    df = mdf.to_dataframe()
+    
+    rpm_col = next((c for c in df.columns if 'rpm' in c.lower()), None)
+    speed_col = next((c for c in df.columns if 'speed' in c.lower()), None)
+    
+    if rpm_col and speed_col:
+        df['gear'] = df.apply(
+            lambda row: estimate_gear(row[rpm_col], row[speed_col]), axis=1
+        )
+    
+    df.to_csv(output_file)
+    return df
