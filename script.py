@@ -73,3 +73,8 @@ def export_csv(input_file: str, car: dict, output_file: str = 'output.csv'):
     
     df.to_csv(output_file)
     return df
+
+if __name__=="__main__":
+    car = load_car
+    gear = live_gear_estimate
+    print(f"Current gear: {gear}")
