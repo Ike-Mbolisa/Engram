@@ -53,8 +53,10 @@ def live_gear_estimate(car: dict) -> int:
 
 '''
 Since OBD does not send gear data, we will estimate with the gear ratio, speed and tyre size
+The function itself is in gear.c and gear.dll. what you see is merely a wrapper
 ____________________________________
 Vi gætter på hvilket gear man er i via. gearforhold, fart og dæk størrelse 
+Funktionen likker i gear.c og gear.dll. det er er herinde er bare en wrapper
 '''
 def estimate_gear(Revolutions, Velocity, car: dict):
    ratios = list(car['gear_ratios'].values())
@@ -85,6 +87,12 @@ def export_csv(input_file: str, car: dict, output_file: str = 'output.csv'):
     df.to_csv(output_file)
     return df
 
+'''
+Code runner
+____________________________________
+Kode kører
+
+'''
 if __name__ == "__main__":
     car = load_car("cars/nissan_qashqai_2021.json")
     gear = live_gear_estimate(car)
