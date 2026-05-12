@@ -1,7 +1,19 @@
 import json
+import ctypes
 import obd
 import pandas as pd
 from asammdf import MDF
+
+_lib = ctypes.CDLL("./Core/gear.dll")
+_lib.estimate_gear.restype = ctypes.c_int
+_lib.estimate_gear.argtypes = [
+    ctypes.c_double,
+    ctypes.c_double,
+    ctypes.c_double,
+    ctypes.c_double,
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.c_int
+]
 
 '''
 Loading the car from the .json file to get the correct gear ratio, final drive and tire size
@@ -45,12 +57,11 @@ ____________________________________
 Vi gætter på hvilket gear man er i via. gearforhold, fart og dæk størrelse 
 '''
 def estimate_gear(Revolutions, Velocity, car: dict):
-   if Velocity == 0:
-       return 0
-   Velocity_ms = Velocity / 3.6
-   calculated_ratio = (Revolutions / 60 * car['tyre_circumference']) / (Velocity_ms * car['final_drive'])
-   closest_gear = min(car['gear_ratios'], key=lambda g: abs(car['gear_ratios'][g] - calculated_ratio))
-   return closest_gear
+   ratios = list(car['gear_ratios'].values())
+   arr = (ctypes.c_double * len(ratios))(*ratios)
+   return _lib.estimate_gear(Revolutions, Velocity,
+                              car['tyre_circumference'], car['final_drive'],
+                              arr, len(ratios))
 '''
 The data is exported as a CSV file called output.csv
 We define it as coloums in a data set that we'll use to creat the csv structure
