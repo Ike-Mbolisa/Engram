@@ -114,6 +114,12 @@ Kode kører
 
 '''
 if __name__ == "__main__":
-    for file in os.listdir(r"cars/"):
+    files = os.listdir("cars/")
+    for i, file in enumerate(files):
         car = load_car(f"cars/{file}")
-        print(f"{car['year']} {car['make']} {car['model']}")
+        print(f"{i + 1}. {car['year']} {car['make']} {car['model']}")
+
+    selection = int(input("Select car: ")) - 1
+    car = load_car(f"cars/{files[selection]}")
+    print(f"Selected: {car['year']} {car['make']} {car['model']}")
+    live_gear_estimate(car)
