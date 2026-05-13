@@ -1,4 +1,4 @@
-# Engram - Data logger with python
+# Engram - Data logger with Python and C
 
 Overview
 ------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ At the moment the program is only able to receive data from a 2021 Qashqai. This
 ////
 
 
-# Engram - Dataregistrering med Python 
+# Engram - Dataregistrering med Python og C
 
 Overblik
 ------------------------------------------------------------------------------
