@@ -3,7 +3,16 @@ import ctypes
 import obd
 import pandas as pd
 from asammdf import MDF
+'''
+ctypes are used here because it's impossible for python to read raw C or compiled C on its own.
+ctypes is simply a library that can read compiled C code in the form of .dll files.
+The data types used in the file is declared here, so that the "estimate_gear" can read the right data
+____________________________________
+ctypes bruges fordi det er umuligt for Python at læse normal eller kompileret C kode
+ctypes er bare en library der kan læse kompileret C kode i .dll filer, men ikke normal C filer
+Dataen der bliver brugt i filen skal 
 
+'''
 _lib = ctypes.CDLL("./Core/gear.dll")
 _lib.estimate_gear.restype = ctypes.c_int
 _lib.estimate_gear.argtypes = [
@@ -46,7 +55,14 @@ def read_obd() -> tuple[float, float]:
     Revolutions = connection.query(obd.commands.RPM).value.magnitude
     Velocity = connection.query(obd.commands.SPEED).value.to("km/h").magnitude
     return Revolutions, Velocity
+'''
+The function prompts the program to read the Revolutions and velocity of the car. 
+Upon reading it returns said values and sends them to the next function
+____________________________________
+Funktionen får programmet til at læse hvor mange hurtig bilen er og hvor mange omdregninger moteren laver
+Når det er bleven læst, så sendes dataen til den næste funktion
 
+'''
 def live_gear_estimate(car: dict) -> int:
     Revolutions, Velocity = read_obd()
     return estimate_gear(Revolutions, Velocity, car)
