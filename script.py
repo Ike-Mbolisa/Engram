@@ -4,6 +4,9 @@ import ctypes
 import os
 import obd
 from asammdf import MDF
+import dearpygui.dearpygui as dpg
+
+
 '''
 ctypes are used here because it's impossible for python to read raw C or compiled C on its own.
 ctypes is simply a library that can read compiled C code in the form of .dll files.
@@ -114,6 +117,59 @@ Kode kører
 
 '''
 if __name__ == "__main__":
+    # Pre-load all cars from the directory
+    car_files = os.listdir("cars/")
+    cars = [load_car(f"cars/{f}") for f in car_files]
+    car_labels = [f"{c['year']} {c['make']} {c['model']}" for c in cars]
+
+    def on_start():
+        dpg.configure_item("start_menu", show=False)
+        dpg.configure_item("selection_menu", show=True)
+
+    def on_confirm():
+        selected_label = dpg.get_value("car_combo")
+        idx = car_labels.index(selected_label)
+        car = cars[idx]
+        live_gear_estimate(car)
+        dpg.configure_item("selection_menu", show=False)
+        dpg.configure_item("Revolutions", show=True)
+        dpg.configure_item("Velocity", show=True)
+
+    dpg.create_context()
+    dpg.create_viewport()
+    dpg.setup_dearpygui()
+
+    with dpg.window(label="Start Menu", tag="start_menu"):
+        dpg.add_text("Welcome to Engram")
+        dpg.add_button(label="Start", callback=on_start)
+
+    with dpg.window(label="Select Car", tag="selection_menu", show=False):
+        dpg.add_text("Choose your car")
+        dpg.add_combo(car_labels, label="Car", tag="car_combo")
+        dpg.add_button(label="Confirm", callback=on_confirm)
+    
+    with dpg.window(label="Revolutions", tag="Revolutions", show=False):
+        dpg.add_text("RPM")
+        dpg.add_simple_plot(label="Simpleplot1", default_value=(0.3, 0.9, 0.5, 0.3), height=300)
+        dpg.add_simple_plot(label="Simpleplot2", default_value=(0.3, 0.9, 2.5, 8.9), overlay="Overlaying", height=180,
+                        histogram=True)
+
+    with dpg.window(label="Velocity", tag="Velocity", show=False):
+        dpg.add_text("Velocity")
+        dpg.add_simple_plot(label="Simpleplot1", default_value=(0.3, 0.9, 0.5, 0.3), height=300)
+        dpg.add_simple_plot(label="Simpleplot2", default_value=(0.3, 0.9, 2.5, 8.9), overlay="Overlaying", height=180,
+                        histogram=True)
+
+    dpg.show_viewport()
+    dpg.start_dearpygui()
+    dpg.destroy_context()
+
+'''
+This is how the CLI version of main looks
+____________________________________
+Det her er hvordan CLI versionen af main ser ud
+
+
     files = os.listdir("cars/")
     for i, file in enumerate(files):
         car = load_car(f"cars/{file}")
@@ -122,4 +178,4 @@ if __name__ == "__main__":
     selection = int(input("Select car: ")) - 1
     car = load_car(f"cars/{files[selection]}")
     print(f"Selected: {car['year']} {car['make']} {car['model']}")
-    live_gear_estimate(car)
+    live_gear_estimate(car) '''
