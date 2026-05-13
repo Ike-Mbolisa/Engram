@@ -1,7 +1,8 @@
 import json
+import math
 import ctypes
+import os
 import obd
-import pandas as pd
 from asammdf import MDF
 '''
 ctypes are used here because it's impossible for python to read raw C or compiled C on its own.
@@ -32,7 +33,10 @@ Indlæser info om bilen fra en .json fil, hvor vi har de rigtige gearforhold, ho
 def load_car(path: str) -> dict:
     with open(path) as f:
         car = json.load(f)
-        print(f"{car['year']} {car['make']} {car['model']}")
+        t = car['tyre']
+        sidewall_mm = t['width'] * (t['aspect'] / 100)
+        diameter_mm = t['rim'] * 25.4 + 2 * sidewall_mm
+        car['tyre_circumference'] = math.pi * diameter_mm / 1000
         return car
 
 '''
@@ -110,6 +114,6 @@ Kode kører
 
 '''
 if __name__ == "__main__":
-    car = load_car("cars/nissan_qashqai_2021.json")
-    gear = live_gear_estimate(car)
-    print(f"Current gear: {gear}")
+    for file in os.listdir(r"cars/"):
+        car = load_car(f"cars/{file}")
+        print(f"{car['year']} {car['make']} {car['model']}")

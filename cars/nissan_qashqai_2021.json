@@ -2,7 +2,7 @@
   "make": "Nissan",
   "model": "Qashqai",
   "year": 2021,
-  "tyre_circumference": 2.154,
+  "tyre": { "width": 215, "aspect": 60, "rim": 17 },
   "final_drive": 4.214,
   "gear_ratios": {
     "1": 3.727,
