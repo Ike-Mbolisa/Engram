@@ -140,7 +140,7 @@ if __name__ == "__main__":
     dpg.setup_dearpygui()
 
     with dpg.window(label="Start Menu", tag="start_menu",width=400,height="400"):
-        dpg.add_text("Welcome to Engram")
+        dpg.add_text("Welcome to Sprygan")
         dpg.add_button(label="Start", callback=on_start)
 
     with dpg.window(label="Select Car", tag="selection_menu", show=False):
