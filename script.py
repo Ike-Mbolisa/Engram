@@ -17,7 +17,7 @@ ctypes er bare en library der kan læse kompileret C kode i .dll filer, men ikke
 Dataen der bliver brugt i filen skal 
 
 '''
-_lib = ctypes.CDLL("./Core/gear.dll")
+_lib = ctypes.CDLL("./Core/gear.dll")   
 _lib.estimate_gear.restype = ctypes.c_int
 _lib.estimate_gear.argtypes = [
     ctypes.c_double,
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     dpg.create_viewport()
     dpg.setup_dearpygui()
 
-    with dpg.window(label="Start Menu", tag="start_menu"):
+    with dpg.window(label="Start Menu", tag="start_menu",width=400,height="400"):
         dpg.add_text("Welcome to Engram")
         dpg.add_button(label="Start", callback=on_start)
 
