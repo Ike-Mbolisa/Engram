@@ -1,0 +1,14 @@
+{
+  "make": "Toyota",
+  "model": "Aygo-X",
+  "year": 2025,
+  "tyre": { "width": 175, "aspect": 65, "rim": 17 },
+  "final_drive": 4.294,
+  "gear_ratios": {
+    "1": 3.545,
+    "2": 2.047,
+    "3": 1.310,
+    "4": 1.027,
+    "5": 0.850
+  }
+}

@@ -2,6 +2,7 @@ import json
 import math
 import ctypes
 import os
+import threading
 import obd
 from asammdf import MDF
 import dearpygui.dearpygui as dpg
@@ -126,38 +127,106 @@ if __name__ == "__main__":
         dpg.configure_item("start_menu", show=False)
         dpg.configure_item("selection_menu", show=True)
 
-    def on_confirm():
+    def on_create():
+        dpg.configure_item("start_menu", show=False)
+        dpg.configure_item("create_menu", show=True)
+
+    def obd_loop(car):
+        while dpg.is_dearpygui_running():
+            try:
+                rpm, speed = read_obd()
+                dpg.set_value("rpm_plot", [rpm])
+                dpg.set_value("speed_plot", [speed])
+            except Exception:
+                pass
+
+    def on_confirm_select():
         selected_label = dpg.get_value("car_combo")
         idx = car_labels.index(selected_label)
         car = cars[idx]
-        live_gear_estimate(car)
         dpg.configure_item("selection_menu", show=False)
         dpg.configure_item("Revolutions", show=True)
         dpg.configure_item("Velocity", show=True)
+        threading.Thread(target=obd_loop, args=(car,), daemon=True).start()
+
+    def on_confirm_create():
+        make        = dpg.get_value("input_make")
+        model       = dpg.get_value("input_model")
+        year        = dpg.get_value("input_year")
+        tyre_width  = dpg.get_value("input_tyre_width")
+        tyre_aspect = dpg.get_value("input_tyre_aspect")
+        tyre_rim    = dpg.get_value("input_tyre_rim")
+        final_drive = dpg.get_value("input_final_drive")
+        num_gears   = dpg.get_value("input_num_gears")
+        gear_ratios = {str(i): dpg.get_value(f"input_gear_{i}") for i in range(1, num_gears + 1)}
+
+        car_data = {
+            "make": make,
+            "model": model,
+            "year": year,
+            "tyre": {"width": tyre_width, "aspect": tyre_aspect, "rim": tyre_rim},
+            "final_drive": final_drive,
+            "gear_ratios": gear_ratios
+        }
+
+        filename = f"cars/{make.lower()}_{model.lower()}_{year}.json"
+        with open(filename, "w") as f:
+            json.dump(car_data, f, indent=2)
+
+        new_car = load_car(filename)
+        cars.append(new_car)
+        car_labels.append(f"{year} {make} {model}")
+        dpg.configure_item("car_combo", items=car_labels)
+
+        dpg.configure_item("create_menu", show=False)
+        dpg.configure_item("start_menu", show=True)
 
     dpg.create_context()
     dpg.create_viewport()
     dpg.setup_dearpygui()
 
-    with dpg.window(label="Start Menu", tag="start_menu",width=400,height=400):
+    with dpg.window(label="Start Menu", tag="start_menu"):
         dpg.add_text("Welcome to Sprygan")
         dpg.add_button(label="Start", callback=on_start)
+        dpg.add_button(label="Create Car Profile", callback=on_create)
 
     with dpg.window(label="Select Car", tag="selection_menu", show=False):
         dpg.add_text("Choose your car")
         dpg.add_combo(car_labels, label="Car", tag="car_combo")
-        dpg.add_button(label="Confirm", callback=on_confirm)
-    
+        dpg.add_button(label="Confirm", callback=on_confirm_select)
+
+    with dpg.window(label="Create Car profile", tag="create_menu", show=False):
+        dpg.add_text("Car Info")
+        dpg.add_input_text(label="Make",  tag="input_make")
+        dpg.add_input_text(label="Model", tag="input_model")
+        dpg.add_input_int( label="Year",  tag="input_year")
+        dpg.add_separator()
+        dpg.add_text("Tyre")
+        dpg.add_input_int(  label="Width (mm)",   tag="input_tyre_width")
+        dpg.add_input_int(  label="Aspect (%)",   tag="input_tyre_aspect")
+        dpg.add_input_float(label="Rim (inches)", tag="input_tyre_rim")
+        dpg.add_separator()
+        dpg.add_text("Drivetrain")
+        dpg.add_input_float(label="Final Drive Ratio", tag="input_final_drive")
+        dpg.add_input_int(  label="Number of Gears",   tag="input_num_gears", default_value=6, min_value=4, max_value=8)
+        dpg.add_separator()
+        dpg.add_text("Gear Ratios")
+        for i in range(1, 9):
+            dpg.add_input_float(label=f"Gear {i}", tag=f"input_gear_{i}")
+        dpg.add_separator()
+        dpg.add_button(label="Confirm", callback=on_confirm_create)
+        dpg.add_button(label="Cancel",  callback=lambda: (dpg.configure_item("create_menu", show=False), dpg.configure_item("start_menu", show=True)))
+
     with dpg.window(label="Revolutions", tag="Revolutions", show=False):
         dpg.add_text("RPM")
-        dpg.add_simple_plot(label="Simpleplot1", default_value=(0.3, 0.9, 0.5, 0.3), height=300)
-        dpg.add_simple_plot(label="Simpleplot2", default_value=(0.3, 0.9, 2.5, 8.9), overlay="Overlaying", height=180,
+        dpg.add_simple_plot(label="RPM Plot", tag="rpm_plot", default_value=(0.3, 0.9, 0.5, 0.3), height=300)
+        dpg.add_simple_plot(label="RPM Histogram", default_value=(0.3, 0.9, 2.5, 8.9), overlay="Overlaying", height=180,
                         histogram=True)
 
     with dpg.window(label="Velocity", tag="Velocity", show=False):
         dpg.add_text("Velocity")
-        dpg.add_simple_plot(label="Simpleplot1", default_value=(0.3, 0.9, 0.5, 0.3), height=300)
-        dpg.add_simple_plot(label="Simpleplot2", default_value=(0.3, 0.9, 2.5, 8.9), overlay="Overlaying", height=180,
+        dpg.add_simple_plot(label="Speed Plot", tag="speed_plot", default_value=(0.3, 0.9, 0.5, 0.3), height=300)
+        dpg.add_simple_plot(label="Speed Histogram", default_value=(0.3, 0.9, 2.5, 8.9), overlay="Overlaying", height=180,
                         histogram=True)
 
     dpg.show_viewport()
