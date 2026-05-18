@@ -18,15 +18,37 @@ ctypes er bare en library der kan læse kompileret C kode i .dll filer, men ikke
 Dataen der bliver brugt i filen skal 
 
 '''
-_lib = ctypes.CDLL("./Core/gear.dll")   
+_lib = ctypes.CDLL("./Core/gear.dll")
+
 _lib.estimate_gear.restype = ctypes.c_int
 _lib.estimate_gear.argtypes = [
-    ctypes.c_double,
-    ctypes.c_double,
-    ctypes.c_double,
-    ctypes.c_double,
-    ctypes.POINTER(ctypes.c_double),
-    ctypes.c_int
+    ctypes.c_double,                   # revolutions
+    ctypes.c_double,                   # velocity
+    ctypes.c_double,                   # tyre_circumference
+    ctypes.c_double,                   # final_drive
+    ctypes.POINTER(ctypes.c_double),   # gear_ratios
+    ctypes.c_int,                      # num_gears
+    ctypes.POINTER(ctypes.c_double),   # confidence_out (nullable)
+]
+
+_lib.smooth_signal.restype = ctypes.c_double
+_lib.smooth_signal.argtypes = [
+    ctypes.POINTER(ctypes.c_double),   # buffer
+    ctypes.POINTER(ctypes.c_int),      # head
+    ctypes.c_int,                      # size
+    ctypes.c_double,                   # new_sample
+]
+
+_lib.estimate_gear_batch.restype = None
+_lib.estimate_gear_batch.argtypes = [
+    ctypes.POINTER(ctypes.c_double),   # revolutions
+    ctypes.POINTER(ctypes.c_double),   # velocities
+    ctypes.c_int,                      # count
+    ctypes.c_double,                   # tyre_circumference
+    ctypes.c_double,                   # final_drive
+    ctypes.POINTER(ctypes.c_double),   # gear_ratios
+    ctypes.c_int,                      # num_gears
+    ctypes.POINTER(ctypes.c_int),      # output
 ]
 
 '''
@@ -73,7 +95,8 @@ Når det er bleven læst, så sendes dataen til den næste funktion
 '''
 def live_gear_estimate(car: dict) -> int:
     Revolutions, Velocity = read_obd()
-    return estimate_gear(Revolutions, Velocity, car)
+    gear, _ = estimate_gear(Revolutions, Velocity, car)
+    return gear
 
 '''
 Since OBD does not send gear data, we will estimate with the gear ratio, speed and tyre size
@@ -83,11 +106,13 @@ Vi gætter på hvilket gear man er i via. gearforhold, fart og dæk størrelse
 Funktionen likker i gear.c og gear.dll. det er er herinde er bare en wrapper
 '''
 def estimate_gear(Revolutions, Velocity, car: dict):
-   ratios = list(car['gear_ratios'].values())
-   arr = (ctypes.c_double * len(ratios))(*ratios)
-   return _lib.estimate_gear(Revolutions, Velocity,
-                              car['tyre_circumference'], car['final_drive'],
-                              arr, len(ratios))
+    ratios = list(car['gear_ratios'].values())
+    arr = (ctypes.c_double * len(ratios))(*ratios)
+    confidence = ctypes.c_double(0.0)
+    gear = _lib.estimate_gear(Revolutions, Velocity,
+                               car['tyre_circumference'], car['final_drive'],
+                               arr, len(ratios), ctypes.byref(confidence))
+    return gear, confidence.value
 '''
 The data is exported as a CSV file called output.csv
 We define it as coloums in a data set that we'll use to creat the csv structure
@@ -97,17 +122,23 @@ we definer kolonnerne, der dermed skal bruges til at oprette csv strukturen
 '''
 def export_csv(input_file: str, car: dict, output_file: str = 'output.csv'):
     mdf = MDF(input_file)
-    
     df = mdf.to_dataframe()
-    
-    Revolutions_col = next((c for c in df.columns if 'Revolutions' in c.lower()), None)
-    Velocity_col = next((c for c in df.columns if 'Velocity' in c.lower()), None)
-    
+
+    Revolutions_col = next((c for c in df.columns if 'revolutions' in c.lower()), None)
+    Velocity_col = next((c for c in df.columns if 'velocity' in c.lower()), None)
+
     if Revolutions_col and Velocity_col:
-        df['gear'] = df.apply(
-            lambda row: estimate_gear(row[Revolutions_col], row[Velocity_col], car), axis=1
-        )
-    
+        ratios = list(car['gear_ratios'].values())
+        ratio_arr = (ctypes.c_double * len(ratios))(*ratios)
+        n = len(df)
+        rpm_arr = (ctypes.c_double * n)(*df[Revolutions_col].tolist())
+        vel_arr = (ctypes.c_double * n)(*df[Velocity_col].tolist())
+        out_arr = (ctypes.c_int * n)()
+        _lib.estimate_gear_batch(rpm_arr, vel_arr, ctypes.c_int(n),
+                                  car['tyre_circumference'], car['final_drive'],
+                                  ratio_arr, ctypes.c_int(len(ratios)), out_arr)
+        df['gear'] = list(out_arr)
+
     df.to_csv(output_file)
     return df
 
@@ -132,11 +163,20 @@ if __name__ == "__main__":
         dpg.configure_item("create_menu", show=True)
 
     def obd_loop(car):
+        SMOOTH_SIZE = 5
+        rpm_buf  = (ctypes.c_double * SMOOTH_SIZE)(*([0.0] * SMOOTH_SIZE))
+        rpm_head = ctypes.c_int(0)
+        spd_buf  = (ctypes.c_double * SMOOTH_SIZE)(*([0.0] * SMOOTH_SIZE))
+        spd_head = ctypes.c_int(0)
         while dpg.is_dearpygui_running():
             try:
                 rpm, speed = read_obd()
-                dpg.set_value("rpm_plot", [rpm])
-                dpg.set_value("speed_plot", [speed])
+                smooth_rpm   = _lib.smooth_signal(rpm_buf,  ctypes.byref(rpm_head),  SMOOTH_SIZE, rpm)
+                smooth_speed = _lib.smooth_signal(spd_buf,  ctypes.byref(spd_head),  SMOOTH_SIZE, speed)
+                gear, confidence = estimate_gear(smooth_rpm, smooth_speed, car)
+                dpg.set_value("rpm_plot",     [smooth_rpm])
+                dpg.set_value("speed_plot",   [smooth_speed])
+                dpg.set_value("gear_display", f"Gear: {gear}  (confidence: {confidence:.3f})")
             except Exception:
                 pass
 
@@ -219,6 +259,7 @@ if __name__ == "__main__":
 
     with dpg.window(label="Revolutions", tag="Revolutions", show=False):
         dpg.add_text("RPM")
+        dpg.add_text("Gear: --", tag="gear_display")
         dpg.add_simple_plot(label="RPM Plot", tag="rpm_plot", default_value=(0.3, 0.9, 0.5, 0.3), height=300)
         dpg.add_simple_plot(label="RPM Histogram", default_value=(0.3, 0.9, 2.5, 8.9), overlay="Overlaying", height=180,
                         histogram=True)
