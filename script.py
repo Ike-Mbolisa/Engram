@@ -155,10 +155,10 @@ if __name__ == "__main__":
         year        = dpg.get_value("input_year")
         tyre_width  = dpg.get_value("input_tyre_width")
         tyre_aspect = dpg.get_value("input_tyre_aspect")
-        tyre_rim    = dpg.get_value("input_tyre_rim")
-        final_drive = dpg.get_value("input_final_drive")
+        tyre_rim    = round(dpg.get_value("input_tyre_rim"), 1)
+        final_drive = round(dpg.get_value("input_final_drive"), 4)
         num_gears   = dpg.get_value("input_num_gears")
-        gear_ratios = {str(i): dpg.get_value(f"input_gear_{i}") for i in range(1, num_gears + 1)}
+        gear_ratios = {str(i): round(dpg.get_value(f"input_gear_{i}"), 4) for i in range(1, num_gears + 1)}
 
         car_data = {
             "make": make,
@@ -195,7 +195,7 @@ if __name__ == "__main__":
         dpg.add_combo(car_labels, label="Car", tag="car_combo")
         dpg.add_button(label="Confirm", callback=on_confirm_select)
 
-    with dpg.window(label="Create Car profile", tag="create_menu", show=False):
+    with dpg.window(label="Create Car profile", tag="create_menu", show=False,width=500):
         dpg.add_text("Car Info")
         dpg.add_input_text(label="Make",  tag="input_make")
         dpg.add_input_text(label="Model", tag="input_model")
