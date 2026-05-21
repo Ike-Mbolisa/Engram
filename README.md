@@ -19,12 +19,12 @@ Although by launching from the code editor, you will need to download the packag
 
 Work in progress / Acknowledgements
 ------------------------------------------------------------------------------
-As of Version 0.7, the program is still missing many things from the final vision. 
+As of Version 0.8, the program is still missing many things from the final vision. 
 
 This includes: 
- - Compatibility with other cars
+ - ~~Compatibility with other cars~~ 
  - ~~Proper data logging~~ 
- - Ui
+ - ~~Ui~~
  - Portability
  - Launching outside of Visual Studio Code, or any code editor
 
@@ -57,11 +57,11 @@ Dog hvis man starter det fra Visual Studio eller VS Code, kræver det at man har
 
 Under vejs / Anerkendelser
 ------------------------------------------------------------------------------
-Lige nu i version 0.7, mangler programmet stadig en del. 
+Lige nu i version 0.8, mangler programmet stadig en del. 
 Det inkludere:
 
-- Kompatibilitet med andre biler
+- ~~Kompatibilitet med andre biler~~
 - ~~Bedre dataregristrering~~
-- Ui
+- ~~Ui~~
 - bærbarhed
 - Opstart udenfor Visual Studio og VS Code
