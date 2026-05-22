@@ -12,10 +12,12 @@ import dearpygui.dearpygui as dpg
 ctypes are used here because it's impossible for python to read raw C or compiled C on its own.
 ctypes is simply a library that can read compiled C code in the form of .dll files.
 The data types used in the file is declared here, so that the "estimate_gear" can read the right data
+Do not delete if you want to use gear.dll
 ____________________________________
 ctypes bruges fordi det er umuligt for Python at læse normal eller kompileret C kode
 ctypes er bare en library der kan læse kompileret C kode i .dll filer, men ikke normal C filer
 Dataen der bliver brugt i filen skal 
+Det må ikke slettes hvis man vil bruge gear.dll
 
 '''
 _lib = ctypes.CDLL("./Core/gear.dll")
@@ -53,8 +55,10 @@ _lib.estimate_gear_batch.argtypes = [
 
 '''
 Loading the car from the .json file to get the correct gear ratio, final drive and tire size
+It is the easiest way to store simple profiles that can be expanden upon
 ____________________________________
 Indlæser info om bilen fra en .json fil, hvor vi har de rigtige gearforhold, hovedgear og dækstørrelse
+Det er den nemmeste måde at opbevarer data der skal tilføjes til senere hen
 '''
 def load_car(path: str) -> dict:
     with open(path) as f:
@@ -226,7 +230,7 @@ if __name__ == "__main__":
     dpg.setup_dearpygui()
 
     with dpg.window(label="Start Menu", tag="start_menu"):
-        dpg.add_text("Welcome to Sprygan")
+        dpg.add_text("Welcome to Gauss")
         dpg.add_button(label="Start", callback=on_start)
         dpg.add_button(label="Create Car Profile", callback=on_create)
 
@@ -273,19 +277,3 @@ if __name__ == "__main__":
     dpg.show_viewport()
     dpg.start_dearpygui()
     dpg.destroy_context()
-
-'''
-This is how the CLI version of main looks
-____________________________________
-Det her er hvordan CLI versionen af main ser ud
-
-
-    files = os.listdir("cars/")
-    for i, file in enumerate(files):
-        car = load_car(f"cars/{file}")
-        print(f"{i + 1}. {car['year']} {car['make']} {car['model']}")
-
-    selection = int(input("Select car: ")) - 1
-    car = load_car(f"cars/{files[selection]}")
-    print(f"Selected: {car['year']} {car['make']} {car['model']}")
-    live_gear_estimate(car) '''

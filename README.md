@@ -1,19 +1,19 @@
-# Sprygan - Data logger with Python and C
+# Gauss - Data logger with Python and C
 
 Overview
 ------------------------------------------------------------------------------
-Sprygan is a data logging program for cars. 
+Gauss is a data logging program for cars. 
 It connects to an OBDII Adapter connected to a car, and while the ignition is on, it will log RPM and Velocity of the car. 
 Currently only compatible with a 2021 Qashqai
 
-Sprygan has the following features:
+Gauss has the following features:
  - Can export CSV Filer
  - Can export Metric
  - Can connect to an OBDII Adapter and receive data
 
 Usage
 ------------------------------------------------------------------------------
-Sprygan is launched directly from the code editor. 
+Gauss is launched directly from the code editor. 
 It requires bluetooth connection to receive data from the car 
 Although by launching from the code editor, you will need to download the packages used in the program
 
@@ -34,15 +34,15 @@ At the moment the program is only able to receive data from a 2021 Qashqai. This
 ////
 
 
-# Sprygan - Dataregistrering med Python og C
+# Gauss - Dataregistrering med Python og C
 
 Overblik
 ------------------------------------------------------------------------------
-Sprygan er et dataregistrerings program til biler. 
+Gauss er et dataregistrerings program til biler. 
 Programmet forbinder sig med en OBDII Adapter som er tilsluttet til en bil. Mens det er at motoren er tændt, registrere den omdrejninger og hastigheden i bilen. 
 I øjeblikket kan programmet bruges i en 2021 Qashqai.
 
-Sprygan kan følgende: 
+Gauss kan følgende: 
 
 - Exportere til CSV Filer
 - Exportere i metriske enheder
@@ -50,7 +50,7 @@ Sprygan kan følgende:
 
 Anvendelse
 ------------------------------------------------------------------------------
-Sprygan skal startes fra en kodeeditor som Visual Studio eller VS Code
+Gauss skal startes fra en kodeeditor som Visual Studio eller VS Code
 Det kræver Bluetooth forbindelse for at modtage data fra bilen
 Dog hvis man starter det fra Visual Studio eller VS Code, kræver det at man har installeret Python pakkerne der bliver brugt
 
